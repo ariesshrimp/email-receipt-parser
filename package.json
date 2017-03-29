@@ -1,0 +1,25 @@
+{
+  "name": "grocery-recipt-parser",
+  "version": "0.0.0",
+  "description": "Parse email recipts from the grocery store and save the results to a google spreadsheet.",
+  "main": "dist/index.js",
+  "author": "Joseph Fraley <jose.fraley@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/pubsub": "^0.8.3",
+    "axios": "^0.15.3",
+    "bluebird": "^3.5.0",
+    "body-parser": "^1.17.1",
+    "chalk": "^1.1.3",
+    "express": "^4.15.2",
+    "express-jwt": "^5.1.0",
+    "google-auth-library": "^0.10.0",
+    "googleapis": "^18.0.0",
+    "ramda": "^0.23.0",
+    "ramda-fantasy": "^0.7.0",
+    "rx": "^4.1.0"
+  },
+  "scripts": {
+    "start": "babel-node source/index.js"
+  }
+}
