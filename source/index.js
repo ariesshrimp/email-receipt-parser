@@ -1,7 +1,6 @@
 import {promisify} from 'bluebird'
 import {gmail} from 'googleapis'
 import {map, head, prop, compose, pipe, propOr, cond, propEq, T, equals} from 'ramda'
-propOr()
 import authorize, {CLIENT_TOKEN} from './authentication'
 import {problem, success} from './messaging'
 import {htmlContentFrom, dataFrom} from './parse-html'
@@ -22,23 +21,19 @@ subject:(Your New Seasons Market Email Receipt)
 newer_than:1d
 `
 
-export const connectToEmail = (auth) => async () => {
-  try {
-    const {messages} = await list({
-      auth,
-      userId: 'me',
-      maxResults: 1,
-      q: query,
-    })
-    return pipe(
-      head,
-      prop('id')
-    )(messages)
-  } catch (e) {
-    throw e
-    // error(problem('connectToEmail failed', e))
-  }
-}
+export const connectToEmail = (auth) => async () => 
+  pipe(
+    propOr('messages', []),
+    head,
+    prop('id')
+  )(await list({
+    auth,
+    userId: 'me',
+    maxResults: 1,
+    q: query,
+  })
+)
+
 
 export const emailContents = (auth) => async (emailId) => {
   try {
@@ -55,7 +50,7 @@ export const emailContents = (auth) => async (emailId) => {
   }
 }
 
-const noEmailsFound = "Cannot read property '0' of undefined"
+const noEmailsFound = "Missing required parameters: id"
 
 export const run = async () => {
   const auth = await authorize(CLIENT_TOKEN)
@@ -71,4 +66,5 @@ export const run = async () => {
   }
 }
 
-setInterval(run, 3600000)
+const oneHour = 3600000
+setInterval(run, oneHour)
