@@ -1,6 +1,5 @@
 import {load} from 'cheerio'
 import {map, head, prop, split, join, compose, pipe, reject, identity, propEq, evolve, tap, trim} from 'ramda'
-import {simple, complex} from './example-email'
 const {error, log} = console
 
 /**
@@ -32,10 +31,16 @@ const {error, log} = console
  * @description strips a gMail email response object of all the metadata
  * and returns raw HTML
  */
-const htmlContentFrom = pipe(
+export const htmlContentFrom = pipe(
   split('Content-Type: text/html; charset="utf-8"'),
   head
 )
+
+// specifically formatted for sorting as a column in GoogleSheets
+const now = () => {
+  const now = new Date()
+  return `${now.getMonth()}/${now.getDate()}/${now.getFullYear()} ${now.getUTCHours()}:${now.getMinutes()}:${now.getSeconds()}`
+}
 
 /**
  * @description takes raw text and transforms it into pure table data.
@@ -45,6 +50,7 @@ const htmlContentFrom = pipe(
 export const dataFrom = (html) => {
     const $ = load(html) // for jQuery emulation
     let items = []
+    
     // TODO:jmf figure out how to work around this garbage jQuery object and use native maps...
     const basket = $('.basket-item-qty').each((index, element) => {
 
@@ -53,23 +59,19 @@ export const dataFrom = (html) => {
       const name = $(desc).text().trim()
       const price = $(amt).text().trim()
 
-      // TODO:jmf refactor this crazy monster
+      // TODO:jmf refactor this crazy monster. probably need a good regex
       const description = $(element)
-        .parent()
-        .next()
-        .next()
-        .find('.basket-item-desc.modifier')
-        .text()
-        .trim()
-        .split('\n')
-        .join('')
-        .split('@')
-        .map(trim)
-        .join(' @ ')
+        .parent().next().next() // look ahead to the description modifier row, skipping a spacer
+        .find('.basket-item-desc.modifier') // only one cell has data
+        .text().trim()
+        .split('\n').join('') // throw out internal new lines
+        .split('@') // pop this for a sec
+        .map(trim) // so we can trim internally
+        .join(' @ ') // drop it back in
 
       // TODO:jmf return idempotent items instead of pushing them this way
       items.push({
-        description,
+        description, // might be empty
         name,
         price,
         quantity,
@@ -82,9 +84,11 @@ export const dataFrom = (html) => {
     return {
       items: reject(propEq('quantity', ''))(items),
       total,
-      date: new Date()
+      date: now() // specifically formatted for sorting as a column in GoogleSheets
     }
 }
 
-const html = htmlContentFrom(complex) // get the html out first
-log(dataFrom(html))
+export default pipe(
+  htmlContentFrom,
+  dataFrom
+)

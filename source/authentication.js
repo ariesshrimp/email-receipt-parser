@@ -2,7 +2,7 @@ import { promisify } from 'bluebird'
 import fs from 'fs'
 import googleAuth from 'google-auth-library'
 import readline from 'readline'
-import {problem, waiting, success, hyperlink, instruction} from './messaging'
+import {problem, waiting, success, link, instruction} from './messaging'
 const {error, log, info} = console
 
 const readFile = async (file) => {
@@ -11,11 +11,13 @@ const readFile = async (file) => {
 }
 const writeFile = promisify(fs.writeFile)
 
-// CONSTANTS
-const scopes = ['https://www.googleapis.com/auth/gmail.readonly']
+const scopes = [
+  'https://www.googleapis.com/auth/gmail.readonly', // get emails
+  'https://www.googleapis.com/auth/spreadsheets', // append data to spreadsheet
+]
+
 const SECRET_PATH = `${__dirname}/local-secret.json`
 
-// MODULE
 export const localToken = async (secretPath) => {
   log(waiting('attempting to read an existing token from disk')   )
   const token = await readFile(secretPath)
@@ -39,7 +41,7 @@ export const newToken = async (oauth) => {
     scope: scopes
   })
   log(instruction('Authorize this app by visiting this url'))
-  info(hyperlink(`
+  info(link(`
 ${authUrl}
 `))
   
