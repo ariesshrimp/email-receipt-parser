@@ -38,4 +38,5 @@ jspm_packages
 
 source/client-secret.json
 source/loacl-secret.json
+source/secrets
 *secret.json

@@ -21,29 +21,32 @@ subject:(Your New Seasons Market Email Receipt)
 newer_than:1d
 `
 
-export const connectToEmail = (auth) => async () => 
+export const connectToEmail = async auth => 
   pipe(
+    () => {
+      const emails = await list({
+        auth,
+        userId: 'me',
+        maxResults: 1,
+        q: query,
+      })
+      return emails
+    },
     propOr('messages', []),
     head,
     prop('id')
-  )(await list({
-    auth,
-    userId: 'me',
-    maxResults: 1,
-    q: query,
-  })
-)
+  )
 
 
 export const emailContents = (auth) => async (emailId) => {
   try {
-    const email = await get({
+    const {raw} = await get({
       auth,
       userId: 'me',
       id: emailId,
       format: 'raw',
     })
-    return new Buffer(email.raw, 'base64').toString('ascii')
+    return new Buffer(raw, 'base64').toString('ascii')
   } catch (e) {
     throw e
     // error(problem('emailContents failed', e))

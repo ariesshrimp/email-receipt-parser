@@ -16,7 +16,7 @@ const scopes = [
   'https://www.googleapis.com/auth/spreadsheets', // append data to spreadsheet
 ]
 
-const SECRET_PATH = `${__dirname}/local-secret.json`
+const SECRET_PATH = `${__dirname}/secrets/local-secret.json`
 
 export const localToken = async (secretPath) => {
   log(waiting('attempting to read an existing token from disk')   )
@@ -87,4 +87,4 @@ export default async ({installed: {
 }
 
 // SECRETS
-export {default as CLIENT_TOKEN} from './client-secret.json'
+export {default as CLIENT_TOKEN} from './secrets/client-secret.json'
